@@ -2,8 +2,8 @@ import React from "react";
 import dynamic from "next/dynamic";
 
 
-const Login = dynamic(() => import("@/components/login"), { ssr: false });
+const Profile = dynamic(() => import("@/components/profile"), { ssr: false });
 
 export default function Home() {
-  return <Login />;
+  return <Profile />;
 }
