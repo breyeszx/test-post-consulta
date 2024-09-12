@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Bell, Home, Search, User,List } from 'lucide-react';
+import { Bell, Home, Search, User, List, MessageSquare } from 'lucide-react';
 
 export default function Bottom() {
   const router = useRouter();
@@ -49,11 +49,11 @@ export default function Bottom() {
 
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-blue-600 border-t border-gray-200 dark:bg-dark dark:border-gray-600">
-      <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
+      <div className="grid h-full max-w-lg grid-cols-6 mx-auto font-medium">
         {/* Botón Home (diferente para cada rol) */}
         <button
           type="button"
-          onClick={handleNavigationHome} // Redirigir a /home-paciente o /home-trabajador según el rol
+          onClick={handleNavigationHome} // Redirigir a /home-pacient o /home-hospital según el rol
           className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <Home className="w-5 h-5 mb-2 text-white dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" />
@@ -83,6 +83,18 @@ export default function Bottom() {
         <span className="text-sm text-white dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
           Categoría
         </span>
+        </button>
+
+        {/* Botón Chat (nuevo botón para el chat) */}
+        <button
+          type="button"
+          onClick={() => handleNavigation('/chat')} // Redirigir a la página de chat
+          className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+        >
+          <MessageSquare className="w-5 h-5 mb-2 text-white dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" />
+          <span className="text-sm text-white dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">
+            Chat
+          </span>
         </button>
 
         {/* Botón Notificaciones (ruta común) */}

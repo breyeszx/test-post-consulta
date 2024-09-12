@@ -1,17 +1,15 @@
 "use client";
-
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Asegúrate de importar useRouter
+import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 
-const Login = ({ role }) => { // Ya no necesitas recibir router como prop
+const Login = ({ role }) => {
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
   const [rut, setRut] = useState('');
   const [diagnostico, setDiagnostico] = useState('Peritonitis');
-
-  const router = useRouter(); // Usamos useRouter para la redirección
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,22 +23,23 @@ const Login = ({ role }) => { // Ya no necesitas recibir router como prop
       role, // Incluimos el rol que viene como prop
     };
 
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    // Simular un inicio de sesión exitoso
+    const res = { ok: true };
 
     if (res.ok) {
-      const { token } = await res.json();
-      localStorage.setItem('token', token);
-      localStorage.setItem('userRole', role); // Guarda el token en localStorage
+      // Almacenar en localStorage como respaldo
+      localStorage.setItem('userName', nombre);
+      localStorage.setItem('userRole', role);
 
-      // Redirige dependiendo del rol
+      // Almacenar en sessionStorage para la sesión de la pestaña actual
+      sessionStorage.setItem('userName', nombre);
+      sessionStorage.setItem('userRole', role); // Session específico por pestaña
+
+      // Redirigir según el rol
       if (role === 'Trabajador') {
-        router.push('/home-hospital'); // Redirige al home de trabajadores
+        router.push('/home-hospital');  // Página de trabajadores
       } else if (role === 'Paciente') {
-        router.push('/home-pacient'); // Redirige al home de pacientes
+        router.push('/home-pacient');   // Página de pacientes
       }
     } else {
       alert('Error en el inicio de sesión');
@@ -52,7 +51,7 @@ const Login = ({ role }) => { // Ya no necesitas recibir router como prop
       <div className="bg-white flex-grow flex flex-col">
         <div className="p-4 bg-blue-500 text-white flex items-center">
           <ChevronLeft className="w-6 h-6" />
-          <div className="text-white flex items-center">Login - {role}</div> {/* Mostramos el rol */}
+          <div className="text-white flex items-center">Login - {role}</div>
         </div>
 
         <form onSubmit={handleSubmit} className="flex-grow flex flex-col p-4 space-y-4">
