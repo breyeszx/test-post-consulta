@@ -1,10 +1,9 @@
 "use client";
-import React, { useState } from 'react';
-import LoginPage from "@/components/login";
-import RoleSelection from "@/components/rol";
+import React, { useState } from "react";
+import EnhancedLogin from "./components/login";
 
 export default function Home() {
-  const [role, setRole] = useState(''); // Guardar el rol seleccionado
+  const [role, setRole] = useState(""); // Guardar el rol seleccionado
 
   // Función que se pasa a RoleSelection para elegir el rol
   const handleRoleSelect = (selectedRole) => {
@@ -13,13 +12,7 @@ export default function Home() {
 
   return (
     <div>
-      {role ? (
-        // Si el rol ya está seleccionado, mostrar el formulario de Login
-        <LoginPage role={role} />
-      ) : (
-        // Si no hay rol seleccionado, mostrar el selector de roles
-        <RoleSelection onRoleSelect={handleRoleSelect} />
-      )}
+      <EnhancedLogin />
     </div>
   );
 }
