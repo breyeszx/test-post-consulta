@@ -1,173 +1,210 @@
 "use client";
-import React, { useState } from "react";
-import { Search, ChevronDown, Home, List, Bell, User } from "lucide-react";
 
-const HomePatient = () => {
+import React, { useState } from "react";
+import { Search, ChevronDown, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+export default function HomePatient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [reaction, setReaction] = useState(null); // Estado para almacenar la reacción
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [reactions, setReactions] = useState({});
+  const [comments, setComments] = useState({});
+  const [showThankYou, setShowThankYou] = useState(false);
+
+  const questions = [
+    "¿Cómo te sientes hoy?",
+    "¿Cómo calificarías tu dolor?",
+    "¿Cómo ha sido tu sueño?",
+    "¿Cómo es tu nivel de energía?",
+  ];
 
   const openModal = () => {
     setIsModalOpen(true);
+    setCurrentQuestion(0);
+    setReactions({});
+    setComments({});
+    setShowThankYou(false);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setShowThankYou(false);
   };
 
-  // Función para manejar la selección de un emoji
-  const handleReaction = async (selectedReaction) => {
-    setReaction(selectedReaction); // Almacena la reacción seleccionada
-    console.log("Reacción enviada:", selectedReaction, "por", "Lia Rebolledo");
-    closeModal(); // Cierra el modal
-  
-    try {
-      const response = await fetch("/api/send-reaction", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reaction: selectedReaction,
-          patient: "Lia Rebolledo", // Asegúrate de que el nombre del paciente sea correcto
-        }),
-      });
-  
-      if (response.ok) {
-        console.log("Reacción enviada correctamente");
-      } else {
-        console.error("Error al enviar la reacción");
+  const handleReaction = (selectedReaction) => {
+    setReactions({ ...reactions, [currentQuestion]: selectedReaction });
+  };
+
+  const handleCommentChange = (event) => {
+    setComments({ ...comments, [currentQuestion]: event.target.value });
+  };
+
+  const handleNextQuestion = async () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      try {
+        // Save data to local storage
+        const data = {
+          reactions: reactions,
+          comments: comments,
+          patient: "Lia Rebolledo",
+          timestamp: new Date().toISOString(),
+        };
+        const existingData = JSON.parse(
+          localStorage.getItem("patientReactions") || "[]"
+        );
+        existingData.push(data);
+        localStorage.setItem("patientReactions", JSON.stringify(existingData));
+
+        // Call API for consistency (optional)
+        await fetch("/api/send-reactions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        console.log("Reacciones y comentarios guardados correctamente");
+        setShowThankYou(true);
+      } catch (error) {
+        console.error("Error al guardar las reacciones y comentarios:", error);
       }
-    } catch (error) {
-      console.error("Error de red:", error);
     }
   };
-  
+
+  const isLastQuestion = currentQuestion === questions.length - 1;
+
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-700 text-white p-4 flex items-center">
-        <span className="font-semibold">Lia Rebolledo</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          className="size-6 ml-auto"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-          />
-        </svg>
+      <header className="bg-blue-600 text-primary-foreground p-4 flex items-center">
+        <span className="font-semibold"></span>
+        <User className="ml-auto h-6 w-6" />
       </header>
 
-      {/* Main content */}
       <main className="flex-grow p-4">
-        {/* Search bar */}
         <div className="relative mb-4">
-          <input
-            type="text"
-            placeholder="Search here..."
-            className="w-full p-2 pl-10 pr-4 border rounded-lg"
-          />
+          <Input type="text" placeholder="Search here..." className="pl-10" />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
 
-        {/* Sort dropdown */}
         <div className="mb-4 flex items-center">
           <span className="mr-2 text-gray-600">Filtrar por fecha</span>
-          <button className="bg-white border rounded p-2 flex items-center">
-            <ChevronDown className="text-gray-400" />
-          </button>
-          <button className="ml-auto">
+          <Button variant="outline" size="icon">
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" className="ml-auto">
             <img
-              src="/api/placeholder/24/24"
+              src="/placeholder.svg?height=24&width=24"
               alt="Filter"
               className="w-6 h-6"
             />
-          </button>
+          </Button>
         </div>
 
-        {/* Patient card */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center mb-3">
-            <img
-              src="/api/placeholder/50/50"
-              alt="Doctor"
-              className="w-12 h-12 rounded-full mr-3"
-            />
-            <div>
-              <h2 className="font-bold">Peritonitis</h2>
-              <p className="text-sm text-gray-600">
-                ¿Cómo se siente después de su alta?
-              </p>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <img
+                src="/placeholder.svg?height=50&width=50"
+                alt="Doctor"
+                className="w-12 h-12 rounded-full mr-3"
+              />
+              <div>
+                <h2 className="font-bold">Peritonitis</h2>
+                <p className="text-sm text-gray-600">
+                  ¿Cómo se siente después de su alta?
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex space-x-2">
-            <button className="bg-red-500 text-white px-4 py-2 rounded-full flex-grow">
-              Ayuda urgente
-            </button>
-            <button
-              className="bg-green-500 text-white px-4 py-2 rounded-full flex-grow"
-              onClick={openModal}
-            >
-              Califique aquí
-            </button>
-          </div>
-        </div>
+            <div className="flex space-x-2">
+              <Button variant="destructive" className="flex-grow">
+                Ayuda urgente
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-grow bg-blue-600 text-white"
+                onClick={openModal}
+              >
+                Califique aquí
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <h2 className="text-xl font-bold mb-4 text-center">
-              ¿Cómo te sientes hoy?
-            </h2>
-
-            {/* Emojis para seleccionar */}
-            <div className="grid grid-cols-2 gap-6 justify-items-center">
-              <div
-                onClick={() => handleReaction("😊")}
-                className="cursor-pointer animate-bounce"
-              >
-                <span className="text-6xl">😊</span>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white rounded-lg">
+          {!showThankYou ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{questions[currentQuestion]}</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-6 justify-items-center mb-4">
+                {["😊", "😐", "😞", "😠"].map((emoji) => (
+                  <div
+                    key={emoji}
+                    onClick={() => handleReaction(emoji)}
+                    className={`cursor-pointer p-2 rounded-full transition-all ${
+                      reactions[currentQuestion] === emoji
+                        ? "outline outline-4 outline-primary animate-pulse"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    <span className="text-6xl">{emoji}</span>
+                  </div>
+                ))}
               </div>
-              <div
-                onClick={() => handleReaction("😞")}
-                className="cursor-pointer animate-bounce"
-              >
-                <span className="text-6xl">😞</span>
-              </div>
-              <div
-                onClick={() => handleReaction("😐")}
-                className="cursor-pointer animate-bounce"
-              >
-                <span className="text-6xl">😐</span>
-              </div>
-              <div
-                onClick={() => handleReaction("😠")}
-                className="cursor-pointer animate-bounce"
-              >
-                <span className="text-6xl">😠</span>
-              </div>
-            </div>
-
-            {/* Botón para cerrar el modal */}
-            <button
-              className="bg-red-500 text-white px-4 py-2 mt-6 rounded hover:bg-red-600 w-full"
-              onClick={closeModal}
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
-
+              {isLastQuestion && (
+                <Textarea
+                  placeholder="Ingrese sus comentarios aquí (opcional)"
+                  value={comments[currentQuestion] || ""}
+                  onChange={handleCommentChange}
+                  className="w-full mb-4"
+                />
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={closeModal}>
+                  Cerrar
+                </Button>
+                <Button
+                  variant="default"
+                  className="bg-blue-600"
+                  onClick={handleNextQuestion}
+                >
+                  {!isLastQuestion ? "Siguiente" : "Finalizar"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>¡Gracias por sus respuestas!</DialogTitle>
+              </DialogHeader>
+              <p className="text-center py-4">
+                Apreciamos su tiempo y feedback. Sus respuestas nos ayudan a
+                mejorar nuestro servicio.
+              </p>
+              <DialogFooter>
+                <Button variant="default" onClick={closeModal}>
+                  Cerrar
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
-};
-
-export default HomePatient;
+}

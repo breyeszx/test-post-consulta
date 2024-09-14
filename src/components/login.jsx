@@ -1,183 +1,147 @@
 "use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, ChevronDown } from "lucide-react";
 
-export default function EnhancedLogin() {
-  const [step, setStep] = useState("role");
-  const [role, setRole] = useState("");
-  const [formData, setFormData] = useState({
-    nombre: "",
-    telefono: "",
-    direccion: "",
-    rut: "",
-    diagnostico: "Peritonitis",
-    contrasena: "",
-  });
-
+const Login = ({ role }) => {
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [rut, setRut] = useState("");
+  const [diagnostico, setDiagnostico] = useState("Peritonitis");
   const router = useRouter();
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload =
-      role === "Paciente"
-        ? formData
-        : {
-            nombre: formData.nombre,
-            rut: formData.rut,
-            contrasena: formData.contrasena,
-          };
+    const payload = {
+      nombre,
+      telefono,
+      direccion,
+      rut,
+      diagnostico,
+      role, // Incluimos el rol que viene como prop
+    };
 
-    try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, role }),
-      });
+    // Simular un inicio de sesión exitoso
+    const res = { ok: true };
 
-      if (res.ok) {
-        const { token, role } = await res.json();
+    if (res.ok) {
+      // Almacenar en localStorage como respaldo
+      localStorage.setItem("userName", nombre);
+      localStorage.setItem("userRole", role);
 
-        localStorage.setItem("token", token);
-        localStorage.setItem("userRole", role);
-        localStorage.setItem("userData", JSON.stringify(payload));
+      // Almacenar en sessionStorage para la sesión de la pestaña actual
+      sessionStorage.setItem("userName", nombre);
+      sessionStorage.setItem("userRole", role); // Session específico por pestaña
 
-        router.push(role === "Paciente" ? "/home-pacient" : "/home-hospital");
-      } else {
-        throw new Error("Error en el registro");
+      // Redirigir según el rol
+      if (role === "Trabajador") {
+        router.push("/home-hospital"); // Página de trabajadores
+      } else if (role === "Paciente") {
+        router.push("/home-pacient"); // Página de pacientes
       }
-    } catch (error) {
-      alert("Error en el registro: " + error.message);
+    } else {
+      alert("Error en el inicio de sesión");
     }
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-md border-blue-200 shadow-lg">
-        <CardHeader className="bg-blue-600 text-white">
-          <CardTitle className="flex items-center">
-            {step !== "role" && (
-              <ChevronLeft
-                className="w-6 h-6 mr-2 cursor-pointer"
-                onClick={() => setStep("role")}
-              />
-            )}
-            <span>Registro - {role || "Seleccione Rol"}</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="mt-4">
-          {step === "role" ? (
-            <div className="space-y-4">
-              <Button
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                onClick={() => {
-                  setRole("Paciente");
-                  setStep("form");
-                }}
+    <div className="bg-gray-200 min-h-screen flex flex-col">
+      <div className="bg-white flex-grow flex flex-col">
+        <div className="p-4 bg-blue-500 text-white flex items-center">
+          <ChevronLeft className="w-6 h-6" />
+          <div className="text-white flex items-center">Login - {role}</div>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="flex-grow flex flex-col p-4 space-y-4"
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Nombre
+            </label>
+            <input
+              type="text"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded text-black"
+              placeholder="Braulio Reyes"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Telefono
+            </label>
+            <input
+              type="tel"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded text-black"
+              placeholder="+569-4567890"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Dirección
+            </label>
+            <input
+              type="text"
+              value={direccion}
+              onChange={(e) => setDireccion(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded text-black"
+              placeholder="Puente Alto"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              RUT
+            </label>
+            <input
+              type="text"
+              value={rut}
+              onChange={(e) => setRut(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded text-black"
+              placeholder="12.345.678-9"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Diagnostico
+            </label>
+            <div className="relative">
+              <select
+                value={diagnostico}
+                onChange={(e) => setDiagnostico(e.target.value)}
+                className="w-full p-2 border border-gray-300 text-black rounded appearance-none"
               >
-                Registrarse como Paciente
-              </Button>
-              <Button
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                onClick={() => {
-                  setRole("Médico");
-                  setStep("form");
-                }}
-              >
-                Registrarse como Médico
-              </Button>
+                <option>Peritonitis</option>
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleInputChange}
-                placeholder="Nombre"
-                required
-                className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-              <Input
-                name="rut"
-                value={formData.rut}
-                onChange={handleInputChange}
-                placeholder="RUT"
-                required
-                className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-              {role === "Paciente" && (
-                <>
-                  <Input
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    placeholder="Teléfono"
-                    required
-                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                  />
-                  <Input
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleInputChange}
-                    placeholder="Dirección"
-                    required
-                    className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-                  />
-                  <Select
-                    name="diagnostico"
-                    value={formData.diagnostico}
-                    onValueChange={(value) =>
-                      handleInputChange({
-                        target: { name: "diagnostico", value },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="border-blue-200 focus:border-blue-400 focus:ring-blue-400">
-                      <SelectValue placeholder="Seleccione diagnóstico" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Peritonitis">Peritonitis</SelectItem>
-                      {/* Add more diagnoses as needed */}
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-              <Input
-                name="contrasena"
-                type="password"
-                value={formData.contrasena}
-                onChange={handleInputChange}
-                placeholder="Contraseña"
-                required
-                className="border-blue-200 focus:border-blue-400 focus:ring-blue-400"
-              />
-              <Button
-                type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                Registrarse como {role}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+
+          <div className="flex-grow"></div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-3 rounded font-medium hover:bg-blue-600 transition duration-300"
+          >
+            Ingresar como {role}
+          </button>
+        </form>
+      </div>
     </div>
   );
-}
+};
+
+export default Login;

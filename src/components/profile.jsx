@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Mail, User } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Mail, User } from "lucide-react";
 
 // Simulación de datos de usuario para pacientes
 const patientData = {
-  firstName: 'Juan',
-  lastName: 'Pérez',
-  email: 'juan.perez@example.com',
-  birthdate: '15 de mayo de 1990',
-  avatar: '/placeholder.svg?height=100&width=100',
+  firstName: "Juan",
+  lastName: "Pérez",
+  email: "juan.perez@example.com",
+  birthdate: "15 de mayo de 1990",
+  avatar: "/placeholder.svg?height=100&width=100",
   medicalInfo: {
-    diagnosis: 'Hipertensión',
-    lastVisit: '1 de marzo de 2023',
+    diagnosis: "Hipertensión",
+    lastVisit: "1 de marzo de 2023",
   },
 };
 
 // Simulación de datos de usuario para trabajadores
 const workerData = {
-  firstName: 'Maria',
-  lastName: 'González',
-  email: 'maria.gonzalez@hospital.com',
-  birthdate: '20 de agosto de 1985',
-  avatar: '/placeholder.svg?height=100&width=100',
+  firstName: "Maria",
+  lastName: "González",
+  email: "maria.gonzalez@hospital.com",
+  birthdate: "20 de agosto de 1985",
+  avatar: "/placeholder.svg?height=100&width=100",
   jobInfo: {
-    position: 'Enfermera',
-    startDate: '15 de enero de 2015',
+    position: "Enfermera",
+    startDate: "15 de enero de 2015",
   },
 };
 
@@ -36,16 +36,14 @@ export default function ProfilePage() {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    const storedRole = localStorage.getItem('userRole'); // Obtener el rol del usuario
+    const storedRole = localStorage.getItem("userRole"); // Obtener el rol del usuario
     if (storedRole) {
       setRole(storedRole);
-      if (storedRole === 'Paciente') {
+      if (storedRole === "Paciente") {
         setUser(patientData); // Cargar datos del paciente
-      } else if (storedRole === 'Trabajador') {
+      } else {
         setUser(workerData); // Cargar datos del trabajador
       }
-    } else {
-      setRole('Unknown');
     }
   }, []);
 
@@ -58,7 +56,10 @@ export default function ProfilePage() {
       <Card className="max-w-md w-full bg-white">
         <CardHeader className="flex flex-row items-center gap-4">
           <Avatar className="w-20 h-20">
-            <AvatarImage src={user.avatar} alt={`${user.firstName} ${user.lastName}`} />
+            <AvatarImage
+              src={user.avatar}
+              alt={`${user.firstName} ${user.lastName}`}
+            />
             <AvatarFallback>
               {user.firstName[0]}
               {user.lastName[0]}
@@ -92,33 +93,43 @@ export default function ProfilePage() {
               <Calendar className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-sm font-medium">Fecha de nacimiento</p>
-                <p className="text-sm text-muted-foreground">{user.birthdate}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user.birthdate}
+                </p>
               </div>
             </div>
 
             {/* Información adicional según el rol */}
-            {role === 'Paciente' && (
+            {role === "Paciente" && (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <p className="text-sm font-medium">Diagnóstico</p>
-                  <p className="text-sm text-muted-foreground">{user.medicalInfo.diagnosis}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.medicalInfo.diagnosis}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <p className="text-sm font-medium">Última visita</p>
-                  <p className="text-sm text-muted-foreground">{user.medicalInfo.lastVisit}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.medicalInfo.lastVisit}
+                  </p>
                 </div>
               </div>
             )}
 
-            {role === 'Trabajador' && (
+            {role === "Trabajador" && (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <p className="text-sm font-medium">Posición</p>
-                  <p className="text-sm text-muted-foreground">{user.jobInfo.position}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.jobInfo.position}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <p className="text-sm font-medium">Fecha de inicio</p>
-                  <p className="text-sm text-muted-foreground">{user.jobInfo.startDate}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.jobInfo.startDate}
+                  </p>
                 </div>
               </div>
             )}
