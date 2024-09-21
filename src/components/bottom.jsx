@@ -22,7 +22,7 @@ export default function Bottom() {
 
   const handleNavigationHome = async () => {
     try {
-      if (role === "Paciente") {
+      if (role === "Usuario") {
         await router.push("/home-pacient"); // Redirigir a home de pacientes
       } else {
         await router.push("/home-hospital"); // Redirigir a home de trabajadores

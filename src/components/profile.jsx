@@ -3,9 +3,18 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Mail, User } from "lucide-react";
+import {
+  Calendar,
+  Mail,
+  User,
+  Home,
+  Settings,
+  HelpCircle,
+  LogOut,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-// Simulación de datos de usuario para pacientes
 const patientData = {
   firstName: "Juan",
   lastName: "Pérez",
@@ -18,7 +27,6 @@ const patientData = {
   },
 };
 
-// Simulación de datos de usuario para trabajadores
 const workerData = {
   firstName: "Maria",
   lastName: "González",
@@ -31,111 +39,132 @@ const workerData = {
   },
 };
 
+function Header({ role }) {
+  return (
+    <header className="bg-blue-600 text-primary-foreground p-4 flex items-center justify-between">
+      <span className="font-semibold text-lg">Perfil de {role}</span>
+      <Link href="/">
+        <Button variant="ghost" size="icon" className="">
+          <LogOut className="h-5 w-5" />
+          <span className="sr-only">Cerrar sesión</span>
+        </Button>
+      </Link>
+    </header>
+  );
+}
+
+function ProfileInfo({ label, value, icon }) {
+  return (
+    <div className="flex items-center gap-3">
+      {icon}
+      <div>
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-sm text-muted-foreground">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("userRole"); // Obtener el rol del usuario
+    const storedRole = localStorage.getItem("userRole");
     if (storedRole) {
       setRole(storedRole);
-      if (storedRole === "Paciente") {
-        setUser(patientData); // Cargar datos del paciente
-      } else {
-        setUser(workerData); // Cargar datos del trabajador
-      }
+      setUser(storedRole === "Usuario" ? patientData : workerData);
     }
   }, []);
 
   if (!user || !role) {
-    return <div>Cargando...</div>; // Mostrar loading mientras se cargan los datos
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Cargando...
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-300 flex items-center justify-center p-4">
-      <Card className="max-w-md w-full bg-white">
-        <CardHeader className="flex flex-row items-center gap-4">
-          <Avatar className="w-20 h-20">
-            <AvatarImage
-              src={user.avatar}
-              alt={`${user.firstName} ${user.lastName}`}
-            />
-            <AvatarFallback>
-              {user.firstName[0]}
-              {user.lastName[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-2xl">
-              {user.firstName} {user.lastName}
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Nombre completo</p>
-                <p className="text-sm text-muted-foreground">
+    <div className="min-h-screen flex flex-col bg-blue-600">
+      <Header role={role} />
+      <div className="flex flex-1">
+        <main className="flex-1 p-4 md:p-6 bg-gray-100 pb-16 md:pb-6">
+          <Card className="max-w-3xl mx-auto">
+            <CardHeader className="flex flex-col sm:flex-row items-center gap-4">
+              <Avatar className="w-24 h-24">
+                <AvatarImage
+                  src={user.avatar}
+                  alt={`${user.firstName} ${user.lastName}`}
+                />
+                <AvatarFallback>
+                  {user.firstName[0]}
+                  {user.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-center sm:text-left">
+                <CardTitle className="text-2xl mb-1">
                   {user.firstName} {user.lastName}
-                </p>
+                </CardTitle>
+                <p className="text-muted-foreground">{role}</p>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Correo electrónico</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <ProfileInfo
+                  label="Nombre completo"
+                  value={`${user.firstName} ${user.lastName}`}
+                  icon={<User className="w-5 h-5 text-muted-foreground" />}
+                />
+                <ProfileInfo
+                  label="Correo electrónico"
+                  value={user.email}
+                  icon={<Mail className="w-5 h-5 text-muted-foreground" />}
+                />
+                <ProfileInfo
+                  label="Fecha de nacimiento"
+                  value={user.birthdate}
+                  icon={<Calendar className="w-5 h-5 text-muted-foreground" />}
+                />
+                {role === "Usuario" && (
+                  <>
+                    <ProfileInfo
+                      label="Diagnóstico"
+                      value={user.medicalInfo.diagnosis}
+                      icon={
+                        <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                      }
+                    />
+                    <ProfileInfo
+                      label="Última visita"
+                      value={user.medicalInfo.lastVisit}
+                      icon={
+                        <Calendar className="w-5 h-5 text-muted-foreground" />
+                      }
+                    />
+                  </>
+                )}
+                {role === "Funcionario" && (
+                  <>
+                    <ProfileInfo
+                      label="Posición"
+                      value={user.jobInfo.position}
+                      icon={<User className="w-5 h-5 text-muted-foreground" />}
+                    />
+                    <ProfileInfo
+                      label="Fecha de inicio"
+                      value={user.jobInfo.startDate}
+                      icon={
+                        <Calendar className="w-5 h-5 text-muted-foreground" />
+                      }
+                    />
+                  </>
+                )}
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Fecha de nacimiento</p>
-                <p className="text-sm text-muted-foreground">
-                  {user.birthdate}
-                </p>
-              </div>
-            </div>
-
-            {/* Información adicional según el rol */}
-            {role === "Paciente" && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-medium">Diagnóstico</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.medicalInfo.diagnosis}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-medium">Última visita</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.medicalInfo.lastVisit}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {role === "Trabajador" && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-medium">Posición</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.jobInfo.position}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-medium">Fecha de inicio</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.jobInfo.startDate}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
     </div>
   );
 }

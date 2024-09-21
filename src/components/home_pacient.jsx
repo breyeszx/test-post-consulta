@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, ChevronDown, User } from "lucide-react";
+import { User, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,23 +15,27 @@ import {
 
 export default function HomePatient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [reactions, setReactions] = useState({});
-  const [comments, setComments] = useState({});
+  const [comment, setComment] = useState("");
   const [showThankYou, setShowThankYou] = useState(false);
 
   const questions = [
-    "¿Cómo te sientes hoy?",
-    "¿Cómo calificarías tu dolor?",
-    "¿Cómo ha sido tu sueño?",
-    "¿Cómo es tu nivel de energía?",
+    "¿Siente dolor de cabeza?",
+    "¿Siente dolor corporal?",
+    "¿Tiene fiebre?",
+    "¿Tiene malestar estomacal?",
+    "Déjanos un comentario",
   ];
+
+  const emojis = ["😢", "😕", "😐", "🙂", "😄"];
 
   const openModal = () => {
     setIsModalOpen(true);
     setCurrentQuestion(0);
     setReactions({});
-    setComments({});
+    setComment("");
     setShowThankYou(false);
   };
 
@@ -46,7 +49,7 @@ export default function HomePatient() {
   };
 
   const handleCommentChange = (event) => {
-    setComments({ ...comments, [currentQuestion]: event.target.value });
+    setComment(event.target.value);
   };
 
   const handleNextQuestion = async () => {
@@ -57,7 +60,7 @@ export default function HomePatient() {
         // Save data to local storage
         const data = {
           reactions: reactions,
-          comments: comments,
+          comment: comment,
           patient: "Lia Rebolledo",
           timestamp: new Date().toISOString(),
         };
@@ -67,21 +70,16 @@ export default function HomePatient() {
         existingData.push(data);
         localStorage.setItem("patientReactions", JSON.stringify(existingData));
 
-        // Call API for consistency (optional)
-        await fetch("/api/send-reactions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        console.log("Reacciones y comentarios guardados correctamente");
+        console.log("Reacciones y comentario guardados correctamente");
         setShowThankYou(true);
       } catch (error) {
-        console.error("Error al guardar las reacciones y comentarios:", error);
+        console.error("Error al guardar las reacciones y comentario:", error);
       }
     }
+  };
+
+  const handleUrgentHelp = () => {
+    setIsAlertModalOpen(true);
   };
 
   const isLastQuestion = currentQuestion === questions.length - 1;
@@ -89,52 +87,31 @@ export default function HomePatient() {
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col">
       <header className="bg-blue-600 text-primary-foreground p-4 flex items-center">
-        <span className="font-semibold"></span>
-        <User className="ml-auto h-6 w-6" />
+        <span className="font-semibold">Usuario</span>
       </header>
 
-      <main className="flex-grow p-4">
-        <div className="relative mb-4">
-          <Input type="text" placeholder="Search here..." className="pl-10" />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-        </div>
-
-        <div className="mb-4 flex items-center">
-          <span className="mr-2 text-gray-600">Filtrar por fecha</span>
-          <Button variant="outline" size="icon">
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" className="ml-auto">
-            <img
-              src="/placeholder.svg?height=24&width=24"
-              alt="Filter"
-              className="w-6 h-6"
-            />
-          </Button>
-        </div>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center mb-3">
-              <img
-                src="/placeholder.svg?height=50&width=50"
-                alt="Doctor"
-                className="w-12 h-12 rounded-full mr-3"
-              />
+      <main className="flex-grow p-4 flex items-center justify-center">
+        <Card className="w-full max-w-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center mb-6">
               <div>
-                <h2 className="font-bold">Peritonitis</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-2xl font-bold mb-2">Peritonitis</h2>
+                <p className="text-lg text-gray-600">
                   ¿Cómo se siente después de su alta?
                 </p>
               </div>
             </div>
-            <div className="flex space-x-2">
-              <Button variant="destructive" className="flex-grow">
+            <div className="flex space-x-4">
+              <Button
+                variant="destructive"
+                className="flex-grow text-lg py-6"
+                onClick={handleUrgentHelp}
+              >
                 Ayuda urgente
               </Button>
               <Button
                 variant="primary"
-                className="flex-grow bg-blue-600 text-white"
+                className="flex-grow bg-blue-600 text-white text-lg py-6"
                 onClick={openModal}
               >
                 Califique aquí
@@ -149,29 +126,39 @@ export default function HomePatient() {
           {!showThankYou ? (
             <>
               <DialogHeader>
-                <DialogTitle>{questions[currentQuestion]}</DialogTitle>
+                <DialogTitle className="text-xl">
+                  {questions[currentQuestion]}
+                </DialogTitle>
               </DialogHeader>
-              <div className="grid grid-cols-2 gap-6 justify-items-center mb-4">
-                {["😊", "😐", "😞", "😠"].map((emoji) => (
-                  <div
-                    key={emoji}
-                    onClick={() => handleReaction(emoji)}
-                    className={`cursor-pointer p-2 rounded-full transition-all ${
-                      reactions[currentQuestion] === emoji
-                        ? "outline outline-4 outline-primary animate-pulse"
-                        : "hover:bg-gray-100"
-                    }`}
-                  >
-                    <span className="text-6xl">{emoji}</span>
-                  </div>
-                ))}
-              </div>
-              {isLastQuestion && (
+              {!isLastQuestion ? (
+                <div className="flex justify-between mb-4">
+                  {emojis.map((emoji, index) => (
+                    <div
+                      key={index}
+                      onClick={() => handleReaction(emoji)}
+                      className={`cursor-pointer p-2 w-16 h-16 border-2 rounded-full transition-all flex items-center justify-center ${
+                        reactions[currentQuestion] === emoji
+                          ? "bg-blue-100 border-blue-600"
+                          : "border-gray-300 hover:border-blue-600"
+                      }`}
+                    >
+                      <span
+                        className="text-3xl"
+                        role="img"
+                        aria-label={`Reacción ${index + 1}`}
+                      >
+                        {emoji}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
                 <Textarea
-                  placeholder="Ingrese sus comentarios aquí (opcional)"
-                  value={comments[currentQuestion] || ""}
+                  placeholder="Ingrese su comentario aquí"
+                  value={comment}
                   onChange={handleCommentChange}
                   className="w-full mb-4"
+                  rows={5}
                 />
               )}
               <DialogFooter>
@@ -190,19 +177,54 @@ export default function HomePatient() {
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>¡Gracias por sus respuestas!</DialogTitle>
+                <DialogTitle className="text-xl">
+                  ¡Gracias por sus respuestas!
+                </DialogTitle>
               </DialogHeader>
-              <p className="text-center py-4">
+              <p className="text-center py-4 text-lg">
                 Apreciamos su tiempo y feedback. Sus respuestas nos ayudan a
                 mejorar nuestro servicio.
               </p>
               <DialogFooter>
-                <Button variant="default" onClick={closeModal}>
+                <Button
+                  variant="default"
+                  onClick={closeModal}
+                  className="w-full"
+                >
                   Cerrar
                 </Button>
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAlertModalOpen} onOpenChange={setIsAlertModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-6 w-6" />
+              Alerta de Ayuda Urgente
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-center text-lg mb-4">
+              Se ha notificado al hospital y a su persona significativa sobre su
+              solicitud de ayuda urgente.
+            </p>
+            <p className="text-center text-lg">
+              Un equipo médico se pondrá en contacto con usted a la brevedad.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={() => setIsAlertModalOpen(false)}
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
+            >
+              Entendido
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
