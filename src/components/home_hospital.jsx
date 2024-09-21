@@ -252,9 +252,7 @@ export function AddPatientModal({ onAddPatient }) {
             </Select>
           </div>
           <div className="mt-6 mb-2">
-            <h3 className="text-lg font-semibold">
-              Persona Significativa (Opcional)
-            </h3>
+            <h3 className="text-lg font-semibold">Persona Significativa</h3>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="significantPerson.name" className="text-right">
@@ -333,16 +331,11 @@ const HomeComponent = () => {
   };
 
   return (
-    <div className="w-full min-h-screen mx-auto bg-gray-50 shadow-lg rounded-lg overflow-hidden pb-12">
+    <div className="w-full min-h-screen mx-auto bg-gray-50 shadow-lg  overflow-hidden pb-12">
+      <header className="bg-blue-600 text-primary-foreground p-4 flex items-center">
+        <span className="font-semibold">Usuario</span>
+      </header>
       <div className="p-6">
-        <div className="relative mb-6">
-          <input
-            type="text"
-            placeholder="Buscar paciente..."
-            className="w-full p-3 text-gray-900 border rounded-lg pl-12 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
-        </div>
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">
             Lista de Pacientes
